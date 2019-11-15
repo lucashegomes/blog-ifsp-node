@@ -4,35 +4,35 @@ const Product = mongoose.model('Product');
 module.exports = {
     
     async index(req, res) {
-        const products = await Product.find();
+        const { page = 1 } = req.query;
+        
+        const products = await Product.paginate( {}, { page, limit: 2 } );
         return res.json(products);
     },
 
     async show(req, res) {
-        const product = Product.findById( req.params.id );
-        return res.json(product);
+        const product = await Product.findById( req.params.id );
+        
+        if (product === null) {
+            return res.json({status: "501", msg: "Nao encontrado!"});
+        }
+
+        return res.json({status: "200", data: product});
     },
 
     async post(req, res) {
-        const product = Product.create( req.body );
+        const product = await Product.create( req.body );
         return res.json(product);
     },
 
     async put(req, res) {
         // new : true is necessary to show product updated, set as false will show currenty product before update
-        const product = '';
-        try {
-            product = Product.findByIdAndUpdate( req.params.id, req.body, { new : true} );
-        } catch (e) {
-
-        }
+        const product = await Product.findByIdAndUpdate( req.params.id, req.body, { new : true} );
         return res.json(product);
-        // return res.send(console.log(req));
     },
 
     async delete(req, res) {
-        const product = Product.findOneAndRemove( req.params.id );
-        // return res.send(product);
+        const product = await Product.findOneAndRemove( req.params.id );
         return res.send('Product deleted!');
     },
 
